@@ -11,13 +11,17 @@ export interface Env {
   SESSIONS: KVNamespace;
   CACHE: KVNamespace;
 
-  // Environment Variables
+  // Environment Variables - Required
   CLAUDE_API_KEY: string;
   PRIVY_APP_ID: string;
   PRIVY_APP_SECRET: string;
-  GEOCODING_API_KEY: string;
-  SMS_API_KEY: string;
-  SMS_API_SECRET: string;
+  MAPBOX_TOKEN: string;
+
+  // Environment Variables - Optional
+  RESEND_API_KEY?: string;
+  TWILIO_ACCOUNT_SID?: string;
+  TWILIO_AUTH_TOKEN?: string;
+  TWILIO_PHONE_NUMBER?: string;
 }
 
 export default {

@@ -2,15 +2,26 @@
 # Copy this file to .dev.vars and fill in your actual values
 
 # Claude API Key (Get from: https://console.anthropic.com/)
+# REQUIRED for MVP - conversational AI interface
 CLAUDE_API_KEY=sk-ant-your-key-here
 
 # Privy Authentication (Get from: https://dashboard.privy.io/)
+# REQUIRED for MVP - user authentication
 PRIVY_APP_ID=your-privy-app-id
 PRIVY_APP_SECRET=your-privy-app-secret
 
-# Geocoding API (Google Maps or similar)
-GEOCODING_API_KEY=your-geocoding-api-key
+# Mapbox Geocoding API (https://account.mapbox.com/)
+# REQUIRED for MVP - location services and proximity matching
+# Public token format: pk.xxxxx
+MAPBOX_TOKEN=your-mapbox-token-here
 
-# SMS Gateway (Twilio or similar)
-SMS_API_KEY=your-sms-api-key
-SMS_API_SECRET=your-sms-api-secret
+# Email Service (Resend - https://resend.com/)
+# RECOMMENDED for MVP - notifications (alternative to SMS)
+# Free tier: 3,000 emails/month
+RESEND_API_KEY=re_your-key-here
+
+# SMS Gateway (Twilio - https://www.twilio.com/console)
+# OPTIONAL - Can use email notifications instead for MVP
+TWILIO_ACCOUNT_SID=your-twilio-sid
+TWILIO_AUTH_TOKEN=your-twilio-token
+TWILIO_PHONE_NUMBER=your-twilio-number
