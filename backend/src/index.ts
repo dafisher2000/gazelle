@@ -3,6 +3,8 @@
  * Natural Disaster Resource Matching App
  */
 
+import { getEnhancedSystemPrompt } from './knowledge-base';
+
 export interface Env {
   // D1 Database
   DB: D1Database;
@@ -128,10 +130,94 @@ async function handleChatRequest(
   path: string,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
-  return new Response(JSON.stringify({ message: 'Chat endpoint - not yet implemented' }), {
+  if (path === '/api/chat/message' && request.method === 'POST') {
+    try {
+      const body = await request.json() as {
+        message: string;
+        type: 'provider' | 'seeker';
+        language: 'en' | 'es';
+        conversationHistory?: Array<{ role: string; content: string }>;
+      };
+
+      // Build system prompt based on type and language using enhanced knowledge base
+      const systemPrompt = getEnhancedSystemPrompt(body.type, body.language);
+
+      // Build messages array for Claude
+      const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+
+      // Add conversation history if exists
+      if (body.conversationHistory && body.conversationHistory.length > 0) {
+        body.conversationHistory.forEach((msg) => {
+          if (msg.role === 'user' || msg.role === 'assistant') {
+            messages.push({
+              role: msg.role,
+              content: msg.content,
+            });
+          }
+        });
+      }
+
+      // Add current message
+      messages.push({
+        role: 'user',
+        content: body.message,
+      });
+
+      // Call Claude API
+      const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': env.CLAUDE_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: messages,
+        }),
+      });
+
+      if (!claudeResponse.ok) {
+        const errorText = await claudeResponse.text();
+        console.error('Claude API Error:', errorText);
+        throw new Error(`Claude API failed: ${claudeResponse.status}`);
+      }
+
+      const claudeData = await claudeResponse.json() as {
+        content: Array<{ type: string; text: string }>;
+      };
+
+      const responseText = claudeData.content[0]?.text || 'I apologize, but I encountered an error.';
+
+      return new Response(
+        JSON.stringify({ response: responseText }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    } catch (error) {
+      console.error('Chat error:', error);
+      return new Response(
+        JSON.stringify({
+          response: 'I apologize, but I encountered an error. Please try again.',
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+  }
+
+  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    status: 405,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
+
+// Old getSystemPrompt function removed - now using getEnhancedSystemPrompt from knowledge-base.ts
 
 async function handleSuppliesRequest(
   request: Request,

@@ -1,0 +1,174 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Water",
+      "name_es": "Agua",
+      "description": "Bottled water, water purification tablets, water containers",
+      "description_es": "Agua embotellada, tabletas de purificación, contenedores de agua",
+      "questions": [
+        "How many bottles or gallons do you have?",
+        "Are the bottles sealed/unopened?",
+        "What size are the bottles?"
+      ],
+      "questions_es": [
+        "¿Cuántas botellas o galones tiene?",
+        "¿Están las botellas selladas/sin abrir?",
+        "¿De qué tamaño son las botellas?"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Food - Non-Perishable",
+      "name_es": "Alimentos - No Perecederos",
+      "description": "Canned goods, dry goods, ready-to-eat meals, baby food",
+      "description_es": "Alimentos enlatados, productos secos, comidas listas para comer, comida para bebés",
+      "questions": [
+        "What types of food items do you have?",
+        "Are the items unexpired?",
+        "How much food do you have (approximate weight or number of items)?"
+      ],
+      "questions_es": [
+        "¿Qué tipos de alimentos tiene?",
+        "¿Están sin vencer?",
+        "¿Cuánta comida tiene (peso aproximado o número de artículos)?"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Medical Supplies",
+      "name_es": "Suministros Médicos",
+      "description": "First aid kits, bandages, medications, medical equipment",
+      "description_es": "Botiquines de primeros auxilios, vendajes, medicamentos, equipo médico",
+      "questions": [
+        "What specific medical supplies do you have?",
+        "Are medications unexpired?",
+        "Are first aid kits sealed/complete?"
+      ],
+      "questions_es": [
+        "¿Qué suministros médicos específicos tiene?",
+        "¿Están los medicamentos sin vencer?",
+        "¿Están los botiquines sellados/completos?"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Hygiene Products",
+      "name_es": "Productos de Higiene",
+      "description": "Soap, toothpaste, feminine products, diapers, toilet paper",
+      "description_es": "Jabón, pasta dental, productos femeninos, pañales, papel higiénico",
+      "questions": [
+        "What hygiene items do you have?",
+        "What quantities?",
+        "Are items new/unopened?"
+      ],
+      "questions_es": [
+        "¿Qué artículos de higiene tiene?",
+        "¿Qué cantidades?",
+        "¿Son artículos nuevos/sin abrir?"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Clothing",
+      "name_es": "Ropa",
+      "description": "Clean clothing for all ages and sizes",
+      "description_es": "Ropa limpia para todas las edades y tallas",
+      "questions": [
+        "What types of clothing (adult, children, infant)?",
+        "What sizes?",
+        "Is the clothing clean and in good condition?"
+      ],
+      "questions_es": [
+        "¿Qué tipos de ropa (adulto, niños, bebé)?",
+        "¿Qué tallas?",
+        "¿Está la ropa limpia y en buenas condiciones?"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Bedding & Blankets",
+      "name_es": "Ropa de Cama y Mantas",
+      "description": "Blankets, sleeping bags, pillows, sheets",
+      "description_es": "Mantas, sacos de dormir, almohadas, sábanas",
+      "questions": [
+        "What bedding items do you have?",
+        "How many?",
+        "Are items clean?"
+      ],
+      "questions_es": [
+        "¿Qué artículos de cama tiene?",
+        "¿Cuántos?",
+        "¿Están limpios?"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Cleaning Supplies",
+      "name_es": "Productos de Limpieza",
+      "description": "Bleach, disinfectant, trash bags, cleaning tools",
+      "description_es": "Cloro, desinfectante, bolsas de basura, herramientas de limpieza",
+      "questions": [
+        "What cleaning supplies do you have?",
+        "Are containers sealed?",
+        "What quantities?"
+      ],
+      "questions_es": [
+        "¿Qué productos de limpieza tiene?",
+        "¿Están los contenedores sellados?",
+        "¿Qué cantidades?"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Baby Supplies",
+      "name_es": "Suministros para Bebés",
+      "description": "Diapers, formula, baby food, bottles, wipes",
+      "description_es": "Pañales, fórmula, comida para bebés, biberones, toallitas",
+      "questions": [
+        "What baby items do you have?",
+        "What sizes (diaper sizes, formula type)?",
+        "Are items unexpired and sealed?"
+      ],
+      "questions_es": [
+        "¿Qué artículos para bebés tiene?",
+        "¿Qué tallas (tallas de pañales, tipo de fórmula)?",
+        "¿Están sin vencer y sellados?"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Flashlights & Batteries",
+      "name_es": "Linternas y Baterías",
+      "description": "Flashlights, batteries, lanterns, emergency lights",
+      "description_es": "Linternas, baterías, lámparas, luces de emergencia",
+      "questions": [
+        "How many flashlights/lanterns?",
+        "What types of batteries?",
+        "How many batteries?"
+      ],
+      "questions_es": [
+        "¿Cuántas linternas/lámparas?",
+        "¿Qué tipos de baterías?",
+        "¿Cuántas baterías?"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Tools & Equipment",
+      "name_es": "Herramientas y Equipo",
+      "description": "Generators, tarps, duct tape, rope, basic tools",
+      "description_es": "Generadores, lonas, cinta adhesiva, cuerda, herramientas básicas",
+      "questions": [
+        "What tools or equipment do you have?",
+        "Are they in working condition?",
+        "For generators: fuel type and wattage?"
+      ],
+      "questions_es": [
+        "¿Qué herramientas o equipos tiene?",
+        "¿Están en condiciones de funcionamiento?",
+        "Para generadores: ¿tipo de combustible y vataje?"
+      ]
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 **Speed and agility in disaster response.**
 
+🌐 **Live at:** https://gazellehelp.com
+
 Gazelle is a responsive web application that efficiently matches resources with people in need during natural disasters. Built with Vite, React, Cloudflare Workers, and Claude AI, it provides intelligent matching, real-time inventory management, and safety-aware logistics coordination.
 
 ## 🚀 Tech Stack
@@ -147,6 +149,10 @@ wrangler d1 execute gazelle-db --remote --command="SELECT * FROM supply_categori
 
 ## 🚀 Deployment
 
+### Production URLs
+- **Frontend:** https://gazellehelp.com
+- **Backend API:** https://gazelle-api.dfisher-3f3.workers.dev
+
 ### Backend Deployment
 ```bash
 cd backend
@@ -161,6 +167,8 @@ npm run build
 # Deploy to Cloudflare Pages (configure in CF dashboard or use wrangler pages)
 npx wrangler pages deploy dist
 ```
+
+**Custom Domain:** The custom domain `gazellehelp.com` is configured in Cloudflare Dashboard under Pages project settings.
 
 ## 🔑 Environment Variables
 
