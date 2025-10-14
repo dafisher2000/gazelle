@@ -1,0 +1,33 @@
+name = "gazelle-api"
+main = "src/index.ts"
+compatibility_date = "2025-10-14"
+compatibility_flags = ["nodejs_compat"]
+
+# Workers Logs
+[observability]
+enabled = true
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "gazelle-db"
+database_id = "65760f23-09ec-4c47-8dec-c94d193ce71d"
+
+# KV Namespace Bindings
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "1c464ee9f52a4855aeab8cd4b083a0f2"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "3a4495192e254661bc4fbce10e0f381d"
+
+# Environment Variables (for local development)
+# For production, set these as secrets using: wrangler secret put <NAME>
+[vars]
+# CLAUDE_API_KEY will be set as a secret
+# PRIVY_APP_ID will be set as a secret
+# PRIVY_APP_SECRET will be set as a secret
+# GEOCODING_API_KEY will be set as a secret
+# SMS_API_KEY will be set as a secret
+# SMS_API_SECRET will be set as a secret
