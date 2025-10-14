@@ -4,6 +4,7 @@
  */
 
 import { getEnhancedSystemPrompt } from './knowledge-base';
+import { SUPPLY_EXTRACTION_TOOL, getCategoryId, validateSupplyData, createSupplyDescription } from './supply-extraction';
 
 export interface Env {
   // D1 Database
@@ -163,6 +164,19 @@ async function handleChatRequest(
         content: body.message,
       });
 
+      // Prepare Claude API request - include tools for provider conversations
+      const claudeRequestBody: any = {
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: messages,
+      };
+
+      // Only add tools for provider conversations
+      if (body.type === 'provider') {
+        claudeRequestBody.tools = [SUPPLY_EXTRACTION_TOOL];
+      }
+
       // Call Claude API
       const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -171,12 +185,7 @@ async function handleChatRequest(
           'x-api-key': env.CLAUDE_API_KEY,
           'anthropic-version': '2023-06-01',
         },
-        body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 1024,
-          system: systemPrompt,
-          messages: messages,
-        }),
+        body: JSON.stringify(claudeRequestBody),
       });
 
       if (!claudeResponse.ok) {
@@ -186,13 +195,73 @@ async function handleChatRequest(
       }
 
       const claudeData = await claudeResponse.json() as {
-        content: Array<{ type: string; text: string }>;
+        content: Array<{ type: string; text?: string; id?: string; name?: string; input?: any }>;
+        stop_reason: string;
       };
 
-      const responseText = claudeData.content[0]?.text || 'I apologize, but I encountered an error.';
+      // Check if Claude wants to use a tool
+      let responseText = '';
+      let supplyRecorded = false;
+
+      for (const content of claudeData.content) {
+        if (content.type === 'text' && content.text) {
+          responseText = content.text;
+        } else if (content.type === 'tool_use' && content.name === 'record_supply_donation') {
+          // Claude wants to record a supply donation
+          const supplyData = validateSupplyData(content.input);
+
+          if (supplyData) {
+            try {
+              // For now, we'll create a test user and location
+              // In production, these would come from the authenticated user and geocoding
+              const categoryId = getCategoryId(supplyData.category);
+              const description = createSupplyDescription(supplyData);
+
+              // Insert supply into database
+              const result = await env.DB.prepare(`
+                INSERT INTO supplies (
+                  name,
+                  category_id,
+                  location_id,
+                  quantity,
+                  added_by_user_id,
+                  status,
+                  expiration_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+              `).bind(
+                description,
+                categoryId,
+                1, // Default location for now (Houston Community Center)
+                supplyData.quantity,
+                1, // Default user ID for now
+                'available',
+                supplyData.expirationDate || null
+              ).run();
+
+              supplyRecorded = true;
+
+              const successMessage = body.language === 'es'
+                ? `¡Perfecto! He registrado su donación de ${description}. Gracias por su generosidad. Le notificaremos cuando alguien necesite estos suministros.`
+                : `Perfect! I've recorded your donation of ${description}. Thank you for your generosity. We'll notify you when someone needs these supplies.`;
+
+              responseText = successMessage;
+            } catch (dbError) {
+              console.error('Database error:', dbError);
+              const errorMessage = body.language === 'es'
+                ? 'Lo siento, hubo un error al registrar su donación. Por favor, intente de nuevo.'
+                : 'I apologize, there was an error recording your donation. Please try again.';
+              responseText = errorMessage;
+            }
+          }
+        }
+      }
+
+      if (!responseText) {
+        responseText = 'I apologize, but I encountered an error.';
+      }
 
       return new Response(
-        JSON.stringify({ response: responseText }),
+        JSON.stringify({ response: responseText, supplyRecorded }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
