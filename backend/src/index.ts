@@ -5,6 +5,7 @@
 
 import { getEnhancedSystemPrompt } from './knowledge-base';
 import { SUPPLY_EXTRACTION_TOOL, getCategoryId, validateSupplyData, createSupplyDescription } from './supply-extraction';
+import { SUPPLY_SEARCH_TOOL, getCategoryIdForSearch, formatSearchResults, getCategoryName, SupplySearchResult } from './supply-search';
 
 export interface Env {
   // D1 Database
@@ -172,9 +173,11 @@ async function handleChatRequest(
         messages: messages,
       };
 
-      // Only add tools for provider conversations
+      // Add appropriate tools based on user type
       if (body.type === 'provider') {
         claudeRequestBody.tools = [SUPPLY_EXTRACTION_TOOL];
+      } else if (body.type === 'seeker') {
+        claudeRequestBody.tools = [SUPPLY_SEARCH_TOOL];
       }
 
       // Call Claude API
@@ -202,10 +205,65 @@ async function handleChatRequest(
       // Check if Claude wants to use a tool
       let responseText = '';
       let supplyRecorded = false;
+      let suppliesFound: SupplySearchResult[] = [];
 
       for (const content of claudeData.content) {
         if (content.type === 'text' && content.text) {
           responseText = content.text;
+        } else if (content.type === 'tool_use' && content.name === 'search_available_supplies') {
+          // Claude wants to search for available supplies (seeker)
+          try {
+            const searchParams = content.input;
+            const categories: string[] = searchParams.categories || [];
+            const categoryIds = categories.map(getCategoryIdForSearch).filter(id => id > 0);
+
+            if (categoryIds.length > 0) {
+              // Build query to search for supplies
+              const placeholders = categoryIds.map(() => '?').join(',');
+              const query = `
+                SELECT
+                  s.id,
+                  s.name,
+                  s.category_id,
+                  s.quantity,
+                  s.status,
+                  l.name as location_name,
+                  l.latitude,
+                  l.longitude
+                FROM supplies s
+                JOIN locations l ON s.location_id = l.id
+                WHERE s.category_id IN (${placeholders})
+                  AND s.status = 'available'
+                  AND s.quantity > 0
+                ORDER BY s.created_at DESC
+                LIMIT 10
+              `;
+
+              const result = await env.DB.prepare(query).bind(...categoryIds).all();
+
+              if (result.results && result.results.length > 0) {
+                suppliesFound = result.results.map((row: any) => ({
+                  id: row.id,
+                  name: row.name,
+                  category: getCategoryName(row.category_id, body.language),
+                  quantity: row.quantity,
+                  location: row.location_name,
+                  available: true
+                }));
+
+                responseText = formatSearchResults(suppliesFound, body.language);
+              } else {
+                responseText = body.language === 'es'
+                  ? 'Lo siento, no encontré suministros disponibles que coincidan con lo que necesita en este momento. ¿Hay algo más específico que esté buscando?'
+                  : 'I\'m sorry, I didn\'t find any available supplies matching what you need right now. Is there something more specific you\'re looking for?';
+              }
+            }
+          } catch (dbError) {
+            console.error('Supply search error:', dbError);
+            responseText = body.language === 'es'
+              ? 'Lo siento, hubo un error al buscar suministros. Por favor, intente de nuevo.'
+              : 'I apologize, there was an error searching for supplies. Please try again.';
+          }
         } else if (content.type === 'tool_use' && content.name === 'record_supply_donation') {
           // Claude wants to record a supply donation
           const supplyData = validateSupplyData(content.input);
@@ -261,7 +319,11 @@ async function handleChatRequest(
       }
 
       return new Response(
-        JSON.stringify({ response: responseText, supplyRecorded }),
+        JSON.stringify({
+          response: responseText,
+          supplyRecorded,
+          suppliesFound: suppliesFound.length > 0 ? suppliesFound : undefined
+        }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
