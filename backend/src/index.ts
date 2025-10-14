@@ -5,7 +5,7 @@
 
 import { getEnhancedSystemPrompt } from './knowledge-base';
 import { SUPPLY_EXTRACTION_TOOL, getCategoryId, validateSupplyData, createSupplyDescription } from './supply-extraction';
-import { SUPPLY_SEARCH_TOOL, getCategoryIdForSearch, formatSearchResults, getCategoryName, SupplySearchResult, generateMapboxStaticMapUrl, generateMapboxInteractiveUrl } from './supply-search';
+import { SUPPLY_SEARCH_TOOL, getCategoryIdForSearch, formatSearchResults, getCategoryName, generateMapLink, SupplySearchResult, generateMapboxStaticMapUrl, generateMapboxInteractiveUrl } from './supply-search';
 
 export interface Env {
   // D1 Database
@@ -246,9 +246,8 @@ async function handleChatRequest(
                   const latitude = row.latitude;
                   const longitude = row.longitude;
 
-                  // Generate map URLs
-                  const mapLink = generateMapboxInteractiveUrl(latitude, longitude, row.location_name);
-                  const staticMapUrl = generateMapboxStaticMapUrl(latitude, longitude, row.location_name, env.MAPBOX_TOKEN);
+                  // Generate map link (Google Maps for universal compatibility)
+                  const mapLink = generateMapLink(latitude, longitude, row.location_name);
 
                   return {
                     id: row.id,
@@ -259,7 +258,6 @@ async function handleChatRequest(
                     latitude,
                     longitude,
                     mapLink,
-                    staticMapUrl,
                     available: true
                   };
                 });

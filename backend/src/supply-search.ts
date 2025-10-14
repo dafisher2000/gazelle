@@ -125,6 +125,27 @@ function toRad(degrees: number): number {
 }
 
 /**
+ * Generate Mapbox map link for a location
+ */
+export function generateMapLink(
+  latitude: number,
+  longitude: number,
+  locationName: string
+): string {
+  // Mapbox static map URL with a marker
+  // Format: https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+ff0000(lng,lat)/lng,lat,zoom,bearing,pitch/widthxheight@2x?access_token=TOKEN
+  const zoom = 14;
+  const width = 600;
+  const height = 400;
+
+  // URL encode the location name for the marker label
+  const markerLabel = encodeURIComponent(locationName.substring(0, 20));
+
+  // Return Google Maps link (more universally clickable)
+  return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+}
+
+/**
  * Generate a Mapbox static map URL for embedding
  * Creates a map with a marker at the supply location
  */
