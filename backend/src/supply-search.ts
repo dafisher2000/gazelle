@@ -16,8 +16,12 @@ export interface SupplySearchResult {
   category: string;
   quantity: number;
   location: string;
+  latitude?: number;
+  longitude?: number;
   distance?: number;
   available: boolean;
+  mapLink?: string;
+  staticMapUrl?: string;
 }
 
 export interface SupplySearchTool {
@@ -121,6 +125,44 @@ function toRad(degrees: number): number {
 }
 
 /**
+ * Generate a Mapbox static map URL for embedding
+ * Creates a map with a marker at the supply location
+ */
+export function generateMapboxStaticMapUrl(
+  latitude: number,
+  longitude: number,
+  locationName: string,
+  mapboxToken: string,
+  width: number = 600,
+  height: number = 400,
+  zoom: number = 14
+): string {
+  // Mapbox Static Images API
+  // Format: https://api.mapbox.com/styles/v1/{username}//{style_id}/static/{overlay}/{lon},{lat},{zoom}/{width}x{height}{@2x}
+
+  // Add a red marker pin at the location
+  const marker = `pin-l+ff0000(${longitude},${latitude})`;
+
+  const url = `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${marker}/${longitude},${latitude},${zoom}/${width}x${height}@2x?access_token=${mapboxToken}`;
+
+  return url;
+}
+
+/**
+ * Generate a Mapbox interactive map URL
+ * Opens in a new tab/window with full interactivity
+ */
+export function generateMapboxInteractiveUrl(
+  latitude: number,
+  longitude: number,
+  locationName: string
+): string {
+  // Opens Google Maps (more universally accessible)
+  // Alternative: Mapbox GL JS embedded map
+  return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+}
+
+/**
  * Format search results for AI response
  */
 export function formatSearchResults(
@@ -142,9 +184,13 @@ export function formatSearchResults(
       ? (language === 'es' ? ` - ${result.distance} millas de distancia` : ` - ${result.distance} miles away`)
       : '';
 
+    const mapText = result.mapLink
+      ? (language === 'es' ? '\n   📍 Ver mapa: ' : '\n   📍 View map: ') + result.mapLink
+      : '';
+
     return language === 'es'
-      ? `${index + 1}. ${result.name} en ${result.location}${distanceText}`
-      : `${index + 1}. ${result.name} at ${result.location}${distanceText}`;
+      ? `${index + 1}. ${result.name} en ${result.location}${distanceText}${mapText}`
+      : `${index + 1}. ${result.name} at ${result.location}${distanceText}${mapText}`;
   });
 
   const footer = language === 'es'

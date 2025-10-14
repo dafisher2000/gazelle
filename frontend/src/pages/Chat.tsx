@@ -2,9 +2,23 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, Send } from 'lucide-react'
 
+interface SupplyResult {
+  id: number
+  name: string
+  category: string
+  quantity: number
+  location: string
+  latitude?: number
+  longitude?: number
+  mapLink?: string
+  staticMapUrl?: string
+  available: boolean
+}
+
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  supplies?: SupplyResult[]
 }
 
 const translations = {
@@ -107,10 +121,14 @@ const Chat = () => {
 
       const data = await response.json()
 
-      // Add assistant response
+      // Add assistant response with supplies if found
       setMessages(prev => [
         ...prev,
-        { role: 'assistant', content: data.response || 'I apologize, but I encountered an error. Please try again.' },
+        {
+          role: 'assistant',
+          content: data.response || 'I apologize, but I encountered an error. Please try again.',
+          supplies: data.suppliesFound || undefined
+        },
       ])
     } catch (error) {
       console.error('Error sending message:', error)
@@ -179,6 +197,35 @@ const Chat = () => {
               }`}
             >
               <p className="whitespace-pre-wrap">{message.content}</p>
+
+              {/* Show maps for supplies found */}
+              {message.supplies && message.supplies.length > 0 && (
+                <div className="mt-4 space-y-3">
+                  {message.supplies.map((supply, supplyIndex) => (
+                    <div key={supplyIndex} className="border-t pt-3">
+                      {supply.staticMapUrl && (
+                        <div className="mb-2">
+                          <a
+                            href={supply.mapLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block hover:opacity-90 transition-opacity"
+                          >
+                            <img
+                              src={supply.staticMapUrl}
+                              alt={`Map to ${supply.location}`}
+                              className="w-full rounded-lg border border-gray-300"
+                            />
+                            <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                              📍 {lang === 'en' ? 'Click to open in maps' : 'Clic para abrir en mapas'}
+                            </p>
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         ))}

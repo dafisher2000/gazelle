@@ -5,7 +5,7 @@
 
 import { getEnhancedSystemPrompt } from './knowledge-base';
 import { SUPPLY_EXTRACTION_TOOL, getCategoryId, validateSupplyData, createSupplyDescription } from './supply-extraction';
-import { SUPPLY_SEARCH_TOOL, getCategoryIdForSearch, formatSearchResults, getCategoryName, SupplySearchResult } from './supply-search';
+import { SUPPLY_SEARCH_TOOL, getCategoryIdForSearch, formatSearchResults, getCategoryName, SupplySearchResult, generateMapboxStaticMapUrl, generateMapboxInteractiveUrl } from './supply-search';
 
 export interface Env {
   // D1 Database
@@ -242,14 +242,27 @@ async function handleChatRequest(
               const result = await env.DB.prepare(query).bind(...categoryIds).all();
 
               if (result.results && result.results.length > 0) {
-                suppliesFound = result.results.map((row: any) => ({
-                  id: row.id,
-                  name: row.name,
-                  category: getCategoryName(row.category_id, body.language),
-                  quantity: row.quantity,
-                  location: row.location_name,
-                  available: true
-                }));
+                suppliesFound = result.results.map((row: any) => {
+                  const latitude = row.latitude;
+                  const longitude = row.longitude;
+
+                  // Generate map URLs
+                  const mapLink = generateMapboxInteractiveUrl(latitude, longitude, row.location_name);
+                  const staticMapUrl = generateMapboxStaticMapUrl(latitude, longitude, row.location_name, env.MAPBOX_TOKEN);
+
+                  return {
+                    id: row.id,
+                    name: row.name,
+                    category: getCategoryName(row.category_id, body.language),
+                    quantity: row.quantity,
+                    location: row.location_name,
+                    latitude,
+                    longitude,
+                    mapLink,
+                    staticMapUrl,
+                    available: true
+                  };
+                });
 
                 responseText = formatSearchResults(suppliesFound, body.language);
               } else {
